@@ -35,6 +35,7 @@ CONFIRMATION_ANSWER_CONFIRMED = "confirmed"
 SUITE_CONFORMANCE = "conformance"
 SUITE_DISTRIBUTION = "distribution"
 SUITE_AFFINITY = "affinity"
+SUITE_PINNING = "pinning"
 SUITE_FAILOVER = "failover"
 SUITE_RESUMABILITY = "resumability"
 SUITE_ELICITATION = "elicitation"
@@ -43,6 +44,7 @@ ALL_SUITES = frozenset(
         SUITE_CONFORMANCE,
         SUITE_DISTRIBUTION,
         SUITE_AFFINITY,
+        SUITE_PINNING,
         SUITE_FAILOVER,
         SUITE_RESUMABILITY,
         SUITE_ELICITATION,

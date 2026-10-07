@@ -1,0 +1,68 @@
+name: mcp-phase4
+
+x-app: &app
+  build: .
+  image: mcp-phase4-app
+  environment: &queue-environment
+    MCP_NATS_URL: nats://nats:4222
+    MCP_JOB_ACK_WAIT_SECONDS: ${MCP_JOB_ACK_WAIT_SECONDS:-5}
+    MCP_JOB_MAX_DELIVERIES: ${MCP_JOB_MAX_DELIVERIES:-3}
+    MCP_QUEUE_MAX_PENDING: ${MCP_QUEUE_MAX_PENDING:-1000}
+    MCP_LOG_LEVEL: ${MCP_LOG_LEVEL:-INFO}
+  depends_on:
+    nats:
+      condition: service_healthy
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    command: ["--jetstream", "--http_port", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8222/healthz?js-enabled-only=true"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  gateway:
+    <<: *app
+    command: ["python", "-m", "mcpqueue.gateway"]
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *queue-environment
+      MCP_JOB_MESSAGE_TIMEOUT_SECONDS: ${MCP_JOB_MESSAGE_TIMEOUT_SECONDS:-60}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  # Compose creates WORKER_REPLICAS containers. With the autoscale profile, set it to the
+  # maximum and the autoscaler starts/stops them between MCP_MIN_WORKERS and MCP_MAX_WORKERS.
+  worker:
+    <<: *app
+    command: ["python", "-m", "mcpqueue.worker"]
+    deploy:
+      replicas: ${WORKER_REPLICAS:-3}
+    environment:
+      <<: *queue-environment
+      MCP_ELICITATION_MODE: ${MCP_ELICITATION_MODE:-continuation}
+    stop_grace_period: 15s
+
+  autoscaler:
+    <<: *app
+    profiles: ["autoscale"]
+    command: ["python", "-m", "mcpqueue.autoscaler"]
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      <<: *queue-environment
+      MCP_COMPOSE_PROJECT: mcp-phase4
+      MCP_MIN_WORKERS: ${MCP_MIN_WORKERS:-1}
+      MCP_MAX_WORKERS: ${MCP_MAX_WORKERS:-10}
+      MCP_TARGET_JOBS_PER_WORKER: ${MCP_TARGET_JOBS_PER_WORKER:-2}
+      MCP_SCALE_DOWN_COOLDOWN_SECONDS: ${MCP_SCALE_DOWN_COOLDOWN_SECONDS:-20}

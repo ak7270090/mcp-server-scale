@@ -31,6 +31,7 @@ markers = [
     "conformance: MCP basics every HTTP phase must pass",
     "distribution: new sessions spread across replicas",
     "affinity: per-session state survives many calls",
+    "pinning: every call in a session is served by one serving unit",
     "failover: session state survives a replica kill",
     "resumability: a dropped SSE stream resumes with Last-Event-ID",
     "elicitation: the user's answer reaches the waiting tool",

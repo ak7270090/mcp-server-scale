@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Phases 0–3 done; phases 4–5 planned |
-| **Last updated** | 2026-10-06 |
+| **Status** | Phases 0–4 done; phase 5 planned |
+| **Last updated** | 2026-10-08 |
 | **Target spec / SDK** | MCP 2025-11-25, Python SDK `mcp` 1.30.0 (pinned per folder) |
 | **Runtime** | Docker Compose on Windows (Docker Desktop + WSL2), no Kubernetes |
 | **Duration** | about 4.5 weeks (Part A: 2.5 weeks, Part B: 2 weeks) |
@@ -331,35 +331,41 @@ flowchart LR
     js --> w1["worker 1"]
     js --> w2["worker 2"]
     js --> wn["worker N"]
-    w1 & w2 & wn -->|"progress / result"| rs[("results.{session}.{request}")]
+    w1 & w2 & wn -->|"started / progress / input_required / result / failed"| rs(("jobs.results.{job}"))
     rs --> gw
+    w1 & w2 & wn <--> kv[("KV session_counters")]
     js -.->|"queue depth"| as["autoscaler"]
-    as -.->|"docker compose --scale worker=N"| w1
-    js -.->|"max deliveries"| dlq[("dead-letter stream")]
+    as -.->|"docker start / stop workers"| wn
+    js -.->|"max deliveries"| dlq[("DEAD_JOBS stream")]
 ```
 
-**Deliverables:** gateway, worker, and autoscaler services; Tasks support; scaling and chaos results.
+**Deliverables:** gateway, worker, and autoscaler services; scaling and chaos results.
 
-**Package layout:** `src/mcpqueue/gateway/` (`app.py`, `job_publisher.py`, `result_listener.py`),
-`src/mcpqueue/worker/` (`job_consumer.py`, `tool_handlers.py`), `src/mcpqueue/autoscaler/`
-(`queue_depth_monitor.py`, `worker_scaler.py`), shared `config.py`, `constants.py`, `job_messages.py`.
+**Package layout:** `src/mcpqueue/gateway/` (`app.py`, `gateway_tools.py`, `job_runner.py`,
+`job_bus.py`, `event_store.py`), `src/mcpqueue/worker/` (`job_consumer.py`, `tool_handlers.py`,
+`session_counters.py`), `src/mcpqueue/autoscaler/` (`scaling_policy.py`, `scaling_loop.py`,
+`queue_depth_monitor.py`, `worker_scaler.py`), shared `config.py`, `constants.py`,
+`job_messages.py`, `nats_client.py`, `schemas.py`.
 
 **Tasks**
-- [ ] Job and result message schemas (pydantic) in `job_messages.py`
-- [ ] Gateway publishes jobs, maps worker progress to MCP progress notifications
-- [ ] Workers: ack, redelivery, max deliveries → dead-letter; idempotent handlers
-- [ ] Session counter in a NATS JetStream key-value bucket keyed by session ID, so any worker can run `increment_counter`
-- [ ] Long jobs through MCP Tasks if the pinned SDK supports them; otherwise a job ID + `get_job_status` tool
-- [ ] Elicitation, variant A: the worker waits on `answers.{session}.{request}` until the gateway publishes the user's answer
-- [ ] Elicitation, variant B: the worker returns `input_required` + saved state; the gateway asks the user and queues a continuation job that any worker can run; compare idle workers and crash behaviour with variant A
-- [ ] Gateway uses an in-memory event store (copy `event_store.py` from phase 3; the SDK only defines the interface) so clients can resume progress streams with `Last-Event-ID`
-- [ ] Autoscaler: poll depth, scale between min/max with cooldown (all from config)
-- [ ] Backpressure: reject or throttle when the queue is above a limit
+- [x] Job and result message schemas (pydantic) in `job_messages.py`
+- [x] Gateway publishes jobs, maps worker progress to MCP progress notifications (increasing only)
+- [x] Workers: ack, heartbeat, redelivery, max deliveries → dead-letter; idempotent counter
+- [x] Session counter in a NATS JetStream key-value bucket keyed by session ID, so any worker can run `increment_counter`
+- [x] Long jobs: progress streaming + cancel; MCP Tasks **not used** (experimental in the spec, deprecated client API in SDK 1.30)
+- [x] Elicitation, variant A: the worker waits on `jobs.answers.{job}` until the gateway publishes the user's answer
+- [x] Elicitation, variant B: the worker returns `input_required` + saved state; the gateway asks the user and queues a continuation job that any worker can run
+- [x] Gateway uses an in-memory event store (copied from phase 3) so clients can resume progress streams with `Last-Event-ID`
+- [x] Autoscaler: poll depth, scale between min/max with cooldown (all from config); Compose creates the maximum, the autoscaler starts/stops containers
+- [x] Backpressure: JOBS stream `max_msgs` + discard new → tool error "job queue is full"
 
 **Acceptance criteria:** throughput rises as workers scale 1→10; a killed worker's job is redelivered
 and completes once; cancel stops the worker; the autoscaler reacts within the configured window;
 backpressure returns a clean error; both elicitation variants pass, and variant B survives a worker
-kill while waiting for the user.
+kill while waiting for the user. **Met** — 21.2 s → 3.6 s for 10 jobs (1 → 10 workers);
+redelivery completes once with monotonic progress; cancel frees the worker in 0.08 s; 1 → 10
+workers in ~5 s; 7 of 10 calls rejected cleanly at queue limit 3; variant B asks once, variant A
+twice.
 
 ---
 
@@ -493,7 +499,8 @@ Each folder's README records the actual result next to the expected one.
 **Actual (2026-10-06):** 02 four workers — affinity and distribution ❌ every run; resumability and
 elicitation pass or fail at random. 03 — distribution ✅ for new sessions (Envoy load share
 27/42/31%), affinity ✅, failover ❌, resumability ✅ (client must reconnect again behind HAProxy),
-elicitation ✅.
+elicitation ✅. 04 — distribution ✅ (10/10/10), affinity ✅ (KV), failover ✅ (worker kill),
+resumability ✅ (single gateway), elicitation ✅, pinning ❌ by design.
 
 ### 6.3 Standard load profile
 | Stage | Users | Duration |
@@ -571,14 +578,15 @@ gantt
 
 ---
 
-## 10. Open items from phases 0–3
+## 10. Open items from phases 0–4
 | Item | Status |
 |---|---|
+| Phase 4 head-of-line blocking (p50 1.6 s at load vs 55 ms in phase 3) | documented; fix options: several jobs per worker, or a separate queue for slow tools |
 | Manual MCP Inspector check (phase 1) | not done |
 | Full 7-minute load profile, and 1/3/6 replica runs | only a short profile (~1 min) was run |
 | Prometheus + Grafana "requests per replica" dashboard | not built; Jaeger tracing only |
 | Structured logging with `session_id` / `replica_id` on every line (4.3) | servers use the SDK's default logging |
-| pre-commit, CI workflow, git commits per phase (4.4) | not set up; the folder is not a git repository |
+| pre-commit, CI workflow (4.4) | not set up; git repository with a commit per phase since 2026-10-08 |
 
 ---
 

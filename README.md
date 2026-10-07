@@ -9,7 +9,7 @@ Plan: [PLAN.md](PLAN.md).
 | [01-stdio-baseline](01-stdio-baseline/) | stdio, one process per client | done |
 | [02-streamable-http-single](02-streamable-http-single/) | Streamable HTTP, one replica (and the 4-worker failure) | done |
 | [03-sticky-session-lb](03-sticky-session-lb/) | 3 replicas behind HAProxy cookie / nginx prefix / Envoy envelope | done |
-| 04-gateway-queue-workers | gateway + NATS JetStream workers | planned |
+| [04-gateway-queue-workers](04-gateway-queue-workers/) | gateway + NATS JetStream workers + autoscaler | done |
 | 05-api-to-mcp-gateway | REST/gRPC ↔ MCP translation (Part B) | planned |
 
 ## Comparison (short load profile, `get_replica_id`)
@@ -20,6 +20,10 @@ Plan: [PLAN.md](PLAN.md).
 | 03 HAProxy cookie | ✅ | ❌ (`404`) | ✅ | ✅ | 0 / 1,234 | 68 ms |
 | 03 nginx prefix | ✅ | ❌ (`502`) | ✅ | ✅ | 0 / 1,270 | 68 ms |
 | 03 Envoy envelope | ✅ | ❌ (`404`) | ✅ | ✅ | 0 / 1,237 | 67 ms |
+| 04 gateway + 3 workers | ✅ (KV) | ✅ | ✅ | ✅ (asked once, variant B) | 0 / 569 | 3,800 ms |
+
+Phase 4's latency is head-of-line blocking: one job per worker, so quick calls wait behind
+2-second slow jobs. See its README.
 
 ## Setup
 Windows, Python 3.11, one `venv` per folder (`python -m venv .venv` then

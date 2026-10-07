@@ -31,7 +31,8 @@ flowchart LR
 |---|---|
 | `conformance` | tool list, replica identity, progress, `400` without session, `404` unknown/deleted session |
 | `distribution` | 30 new sessions spread across the expected number of serving units |
-| `affinity` | counter goes 1..N with no reset; every call answered by one serving unit |
+| `affinity` | counter goes 1..N with no reset |
+| `pinning` | every call in a session answered by one serving unit |
 | `failover` | kill the replica holding the session; does the counter continue? |
 | `resumability` | drop the stream after the first progress event, resume with `Last-Event-ID` |
 | `elicitation` | the user's answer reaches the waiting `ask_confirmation` call |
@@ -54,4 +55,6 @@ Settings are JSON for list values (`HARNESS_EXPECTED_FAILURES=["failover"]`). An
 environment variable overrides the file, e.g. `HARNESS_LOAD_STEADY_SECONDS=30` for a short run.
 
 ## Results (2026-10-06)
-13 unit tests pass, ruff clean. Suites were run against phases 2 and 3; see their READMEs.
+13 unit tests pass, ruff clean. Suites were run against phases 2, 3 and 4; see their READMEs.
+`pinning` was split from `affinity` for phase 4, where calls spread across workers while the
+counter still survives.
