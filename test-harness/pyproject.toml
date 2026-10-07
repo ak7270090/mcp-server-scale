@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-test-harness"
+version = "0.1.0"
+description = "Phase 0: one test and load harness for every MCP scaling pattern"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp==1.30.0",
+    "httpx>=0.27",
+    "pydantic-settings>=2.5",
+    "pytest>=8.3",
+    "locust>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+extend = "../ruff.toml"
+src = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+markers = [
+    "conformance: MCP basics every HTTP phase must pass",
+    "distribution: new sessions spread across replicas",
+    "affinity: per-session state survives many calls",
+    "failover: session state survives a replica kill",
+    "resumability: a dropped SSE stream resumes with Last-Event-ID",
+    "elicitation: the user's answer reaches the waiting tool",
+]

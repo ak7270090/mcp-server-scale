@@ -1,0 +1,42 @@
+[2026-10-06 02:06:59,914] DESKTOP-RPVUDKQ/INFO/locust.main: Starting Locust 2.46.7
+[2026-10-06 02:06:59,929] DESKTOP-RPVUDKQ/INFO/locust.runners: Shape test starting.
+[2026-10-06 02:06:59,929] DESKTOP-RPVUDKQ/INFO/locust.runners: Shape worker starting
+[2026-10-06 02:06:59,929] DESKTOP-RPVUDKQ/INFO/locust.runners: Shape test updating to 30 users at 30.00 spawn rate
+[2026-10-06 02:06:59,929] DESKTOP-RPVUDKQ/INFO/locust.runners: Ramping to 30 users at a rate of 30.00 per second
+[2026-10-06 02:06:59,929] DESKTOP-RPVUDKQ/INFO/locust.runners: All users spawned: {"McpUser": 30} (30 total users)
+[2026-10-06 02:08:01,399] DESKTOP-RPVUDKQ/INFO/locust.runners: Shape test stopping
+[2026-10-06 02:08:01,567] DESKTOP-RPVUDKQ/INFO/locust.main: Shape test completed, shutting down
+[2026-10-06 02:08:01,571] DESKTOP-RPVUDKQ/INFO/locust.main: Shutting down (exit code 1)
+Type     Name                                                                          # reqs      # fails |    Avg     Min     Max    Med |   req/s  failures/s
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+DELETE   DELETE session                                                                    30   10(33.33%) |     29      22      40     28 |    0.49        0.16
+POST     initialize                                                                        30     0(0.00%) |    109      42     141    120 |    0.49        0.00
+POST     notifications/initialized                                                         30     0(0.00%) |     36      19     117     27 |    0.49        0.00
+POST     tools/call get_replica_id                                                        854  213(24.94%) |     64       2    2082     54 |   13.86        3.46
+POST     tools/call increment_counter                                                     345   70(20.29%) |     70       5    3049     54 |    5.60        1.14
+POST     tools/call run_slow_job                                                          219   55(25.11%) |   1560       4    2094   2094 |    3.55        0.89
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+         Aggregated                                                                      1508  348(23.08%) |    283       2    3049     55 |   24.47        5.65
+
+Response time percentiles (approximated)
+Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+DELETE   DELETE session                                                                         28     30     31     31     37     39     40     40     40     40     40     30
+POST     initialize                                                                            120    130    130    140    140    140    140    140    140    140    140     30
+POST     notifications/initialized                                                              27     28     28     56     92    110    120    120    120    120    120     30
+POST     tools/call get_replica_id                                                              54     57     58     60     64     68     81     99   2100   2100   2100    854
+POST     tools/call increment_counter                                                           54     56     58     59     65     72     89    140   3000   3000   3000    345
+POST     tools/call run_slow_job                                                              2100   2100   2100   2100   2100   2100   2100   2100   2100   2100   2100    219
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+         Aggregated                                                                             55     58     62     65   2000   2100   2100   2100   2100   3000   3000   1508
+
+Error report
+# occurrences      Error                                                                                               
+------------------|---------------------------------------------------------------------------------------------------------------------------------------------
+2                  POST tools/call run_slow_job: HTTP 0                                                                
+213                POST tools/call get_replica_id: HTTP 404                                                            
+70                 POST tools/call increment_counter: HTTP 404                                                         
+53                 POST tools/call run_slow_job: HTTP 404                                                              
+10                 DELETE DELETE session: HTTPError('404 Client Error: Not Found for url: DELETE session')             
+------------------|---------------------------------------------------------------------------------------------------------------------------------------------
+

@@ -1,0 +1,5 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,tools/call get_replica_id,CatchResponseError('HTTP 404'),213,2026-10-05T20:37:26Z,2026-10-05T20:38:01Z
+POST,tools/call run_slow_job,CatchResponseError('HTTP 0'),2,2026-10-05T20:37:24Z,2026-10-05T20:37:24Z
+POST,tools/call run_slow_job,CatchResponseError('HTTP 404'),53,2026-10-05T20:37:27Z,2026-10-05T20:38:00Z
+POST,tools/call increment_counter,CatchResponseError('HTTP 404'),69,2026-10-05T20:37:26Z,2026-10-05T20:38:00Z

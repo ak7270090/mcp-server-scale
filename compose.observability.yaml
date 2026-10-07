@@ -1,0 +1,13 @@
+# Tracing backend shared by every phase. Start: docker compose -f compose.observability.yaml up -d
+# Then run a phase with MCP_OTEL_EXPORTER_ENDPOINT=http://host.docker.internal:4318
+# and open http://localhost:16686 (service "mcp-scaling-lab").
+name: mcp-observability
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4318:4318"

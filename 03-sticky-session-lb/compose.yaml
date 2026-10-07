@@ -1,0 +1,61 @@
+name: mcp-phase3
+
+x-replica: &replica
+  build: .
+  environment: &replica-environment
+    MCP_GRACEFUL_SHUTDOWN_SECONDS: ${MCP_GRACEFUL_SHUTDOWN_SECONDS:-30}
+    MCP_OTEL_EXPORTER_ENDPOINT: ${MCP_OTEL_EXPORTER_ENDPOINT:-}
+    MCP_LOG_LEVEL: ${MCP_LOG_LEVEL:-INFO}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  stop_grace_period: 40s
+
+services:
+  mcp-replica-1:
+    <<: *replica
+    container_name: mcp-replica-1
+    environment:
+      <<: *replica-environment
+      MCP_REPLICA_ID: mcp-replica-1
+
+  mcp-replica-2:
+    <<: *replica
+    container_name: mcp-replica-2
+    environment:
+      <<: *replica-environment
+      MCP_REPLICA_ID: mcp-replica-2
+
+  mcp-replica-3:
+    <<: *replica
+    container_name: mcp-replica-3
+    environment:
+      <<: *replica-environment
+      MCP_REPLICA_ID: mcp-replica-3
+
+  # Variant A: HAProxy inserts a cookie naming the replica.
+  haproxy-cookie:
+    image: haproxy:3.0-alpine
+    volumes:
+      - ./infra/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "8081:8081"
+    depends_on: [mcp-replica-1, mcp-replica-2, mcp-replica-3]
+
+  # Variant B: nginx routes on the replica prefix inside the session ID.
+  nginx-prefix:
+    image: nginx:1.29-alpine
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8082:8082"
+    depends_on: [mcp-replica-1, mcp-replica-2, mcp-replica-3]
+
+  # Variant C: Envoy wraps the upstream address around the session ID (envelope session state).
+  envoy-envelope:
+    image: envoyproxy/envoy:v1.36-latest
+    volumes:
+      - ./infra/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    ports:
+      - "8083:8083"
+      - "9901:9901"
+    depends_on: [mcp-replica-1, mcp-replica-2, mcp-replica-3]

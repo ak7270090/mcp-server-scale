@@ -1,0 +1,14 @@
+name: mcp-phase2
+
+services:
+  mcpserver:
+    build: .
+    ports:
+      - "${MCP_HOST_PORT:-8000}:8000"
+    environment:
+      MCP_WORKER_COUNT: ${MCP_WORKER_COUNT:-1}
+      MCP_OTEL_EXPORTER_ENDPOINT: ${MCP_OTEL_EXPORTER_ENDPOINT:-}
+      MCP_LOG_LEVEL: ${MCP_LOG_LEVEL:-INFO}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stop_grace_period: 40s
