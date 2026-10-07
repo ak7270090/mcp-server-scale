@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites errors="0" failures="7" skipped="0" tests="8" time="29.520992">
+  <testsuite name="schemathesis" hostname="DESKTOP-RPVUDKQ" errors="0" failures="7" skipped="0" tests="8" time="29.520992">
+    <testcase name="POST /facade/tools/inventory_get_stock" time="6.682967">
+      <failure type="failure">1. Test Case ID: ZK6LU6
+
+- Response violates schema
+
+    "{}" is not of type "object"
+
+    Validated against the response schema for status code 200.
+
+    Schema at /properties/result:
+
+        {
+            "type": "object",
+            "properties": {
+                "sku": {
+                    "type": "string"
+                },
+                "available": {
+                    "type": [
+                        "integer",
+                        "string"
+                    ],
+                    "pattern": "^-?\\d+$"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "STOCK_STATUS_UNSPECIFIED",
+                        "IN_STOCK",
+                        "LOW_STOCK",
+            // Output truncated...
+        }
+
+    Value:
+
+        "{}"
+
+[200] OK:
+
+    `{"result":"{}"}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{"sku": "SKU-002", "fields": ["I", "\u001e\u0015 \u0085\uda4e\udd6f:\u00d3\u00e5\u00d8", "\udaf3\udded\u00c3\u009e\u00b4h \u0082,", "\u009eJm\ud8dc\ude86\u009c", "\udb1d\ude48", "\u0089}\ud8a6\udf30K\\\u00ae\u00cf\u00d4E\u00e9\u00dc1", "Q[\u00efZ/", "\ud9fa\udc1b\u00af\ud9b8\ude9c"]}' http://localhost:8000/facade/tools/inventory_get_stock</failure>
+    </testcase>
+    <testcase name="POST /facade/tools/inventory_reserve_stock" time="5.787941">
+      <failure type="failure">1. Test Case ID: uP4XZG
+
+- Server error
+
+- Undocumented HTTP status code
+
+    Received: 500
+    Documented: 200, 400, 404, 422, 502
+
+[500] Internal Server Error:
+
+    `Internal Server Error`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '�' http://localhost:8000/facade/tools/inventory_reserve_stock</failure>
+    </testcase>
+    <testcase name="POST /facade/tools/inventory_watch_stock" time="3.715958">
+      <failure type="failure">1. Test Case ID: HXJemE
+
+- Response violates schema
+
+    "{}" is not of type "object"
+
+    Validated against the response schema for status code 200.
+
+    Schema at /properties/result:
+
+        {
+            "type": "object",
+            "properties": {
+                "sku": {
+                    "type": "string"
+                },
+                "available": {
+                    "type": [
+                        "integer",
+                        "string"
+                    ],
+                    "pattern": "^-?\\d+$"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "STOCK_STATUS_UNSPECIFIED",
+                        "IN_STOCK",
+                        "LOW_STOCK",
+            // Output truncated...
+        }
+
+    Value:
+
+        "{}"
+
+[200] OK:
+
+    `{"result":"{}"}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{"fields": [",Up\udb3a\uddc5\udb4d\udc51\u009a\u00ec", "\u00a3", "p\u00e3Zd\u00b0\u00fc\u0084y\ud9e5\udddf\u0097\ud812\ude84,\udaa8\uddbc]\u0089"], "sku": "SKU-002"}' http://localhost:8000/facade/tools/inventory_watch_stock</failure>
+    </testcase>
+    <testcase name="POST /facade/tools/orders_create_order" time="3.842346">
+      <failure type="failure">1. Test Case ID: MuFaM1
+
+- Response violates schema
+
+    "{}" is not of type "object"
+
+    Validated against the response schema for status code 200.
+
+    Schema at /properties/result:
+
+        {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "title": "Id"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "shipped",
+                        "cancelled"
+                    ],
+                    "title": "OrderStatus"
+                },
+                "customer_email": {
+                    "type": "string",
+                    "title": "Customer Email"
+            // Output truncated...
+        }
+
+    Value:
+
+        "{}"
+
+[200] OK:
+
+    `{"result":"{}"}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{"customer_email": "", "customer_phone": "", "fields": [""], "items": [{"quantity": 1, "sku": ""}]}' http://localhost:8000/facade/tools/orders_create_order</failure>
+    </testcase>
+    <testcase name="POST /facade/tools/orders_get_caller" time="1.643769">
+      <failure type="failure">1. Test Case ID: KET8i1
+
+- Response violates schema
+
+    "{}" is not of type "object"
+
+    Validated against the response schema for status code 200.
+
+    Schema at /properties/result:
+
+        {
+            "type": "object",
+            "properties": {
+                "authorization": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Authorization"
+                },
+                "traceparent": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+            // Output truncated...
+        }
+
+    Value:
+
+        "{}"
+
+[200] OK:
+
+    `{"result":"{}"}`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '{"fields": [""]}' http://localhost:8000/facade/tools/orders_get_caller</failure>
+    </testcase>
+    <testcase name="POST /facade/tools/orders_get_order" time="2.263189">
+      <failure type="failure">1. Test Case ID: 2gGkOQ
+
+- Server error
+
+- Undocumented HTTP status code
+
+    Received: 500
+    Documented: 200, 400, 404, 422, 502
+
+[500] Internal Server Error:
+
+    `Internal Server Error`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '�' http://localhost:8000/facade/tools/orders_get_order</failure>
+    </testcase>
+    <testcase name="POST /facade/tools/orders_list_orders" time="5.345204">
+      <failure type="failure">1. Test Case ID: s8qwke
+
+- Server error
+
+- Undocumented HTTP status code
+
+    Received: 500
+    Documented: 200, 400, 404, 422, 502
+
+[500] Internal Server Error:
+
+    `Internal Server Error`
+
+Reproduce with:
+
+    curl -X POST -H 'Content-Type: application/json' -d '�[' http://localhost:8000/facade/tools/orders_list_orders</failure>
+    </testcase>
+    <testcase name="GET /facade/tools" time="0.239618" />
+  </testsuite>
+</testsuites>

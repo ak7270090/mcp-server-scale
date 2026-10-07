@@ -1,0 +1,63 @@
+Schemathesis v4.29.4
+━━━━━━━━━━━━━━━━━━━━
+
+
+ ✅  Loaded specification from http://localhost:8000/facade/openapi.json (in 0.50s)                                                                                                                                                             
+
+     Base URL:         http://localhost:8000                                                                                                                                                                                                    
+     Specification:    Open API 3.1.0                                                                                                                                                                                                           
+     Operations:       8 selected / 8 total                                                                                                                                                                                                     
+
+
+ ✅  API capabilities:                                                                                                                                                                                                                          
+
+     Supports NULL byte in headers:                            ✘                                                                                                                                                                                
+     Accepts backslash and control characters in URL paths:    ✓                                                                                                                                                                                
+
+ ⏭   Examples (in 0.02s)                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                
+     ⏭  8 skipped                                                                                                                                                                                                                               
+
+ ✅  Coverage (in 22.59s)                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                
+     ✅ 8 passed                                                                                                                                                                                                                                
+
+ ✅  Fuzzing (in 8.64s)                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                
+     ✅ 8 passed                                                                                                                                                                                                                                
+
+=================================== WARNINGS ===================================
+
+Schema validation mismatch: 4 operations mostly rejected generated data due to validation errors, indicating schema constraints don't match API validation
+
+  - POST /facade/tools/inventory_get_stock
+  - POST /facade/tools/inventory_reserve_stock
+  - POST /facade/tools/inventory_watch_stock
+  - POST /facade/tools/orders_get_order
+
+💡 Check your schema constraints - API validation may be stricter than documented
+
+=================================== SUMMARY ====================================
+
+API Operations:
+  Selected: 8/8
+  Tested: 8
+
+Test Phases:
+  ⏭  Examples
+  ✅ Coverage
+  ✅ Fuzzing
+  ⏭  Stateful (not applicable)
+
+Warnings:
+  ⚠️ Schema validation mismatch: 4 operations mostly rejected generated data
+
+Test cases:
+  483 generated, 483 passed
+
+Reports:
+  - JUNIT: C:\Users\gupta\Desktop\my-projects\mcp-scaling-patterns\05-api-to-mcp-gateway\results\integration\schemathesis\junit-20261008T012044Z.xml
+
+Seed: 112969325086363855516391290036063929194
+
+============================= 1 warning in 31.34s ==============================

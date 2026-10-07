@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites errors="0" failures="0" skipped="0" tests="8" time="31.181192">
+  <testsuite name="schemathesis" hostname="DESKTOP-RPVUDKQ" errors="0" failures="0" skipped="0" tests="8" time="31.181192">
+    <testcase name="POST /facade/tools/inventory_get_stock" time="3.022309" />
+    <testcase name="POST /facade/tools/inventory_reserve_stock" time="6.179785" />
+    <testcase name="POST /facade/tools/inventory_watch_stock" time="4.213292" />
+    <testcase name="POST /facade/tools/orders_create_order" time="5.677304" />
+    <testcase name="POST /facade/tools/orders_get_caller" time="2.672237" />
+    <testcase name="POST /facade/tools/orders_get_order" time="3.237364" />
+    <testcase name="POST /facade/tools/orders_list_orders" time="5.969073" />
+    <testcase name="GET /facade/tools" time="0.209829" />
+  </testsuite>
+</testsuites>

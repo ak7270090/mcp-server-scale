@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inventory-grpc"
+version = "0.1.0"
+description = "Phase 5 sample gRPC backend (inventory)"
+requires-python = ">=3.11"
+dependencies = [
+    "grpcio>=1.66",
+    "grpcio-reflection>=1.66",
+    "protobuf>=5.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "grpcio-tools>=1.66",
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+extend = "../../../ruff.toml"
+src = ["src"]
+extend-exclude = ["src/inventory"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

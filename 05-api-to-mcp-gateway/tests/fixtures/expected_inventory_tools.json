@@ -1,0 +1,249 @@
+[
+  {
+    "name": "inventory_get_stock",
+    "description": "inventory.v1.InventoryService.GetStock.",
+    "read_only": true,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "sku": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "sku": {
+          "type": "string"
+        },
+        "available": {
+          "type": [
+            "integer",
+            "string"
+          ],
+          "pattern": "^-?\\d+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "STOCK_STATUS_UNSPECIFIED",
+            "IN_STOCK",
+            "LOW_STOCK",
+            "OUT_OF_STOCK"
+          ]
+        },
+        "warehouse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "route": {
+      "kind": "grpc",
+      "service": "inventory.v1.InventoryService",
+      "method": "GetStock",
+      "server_streaming": false
+    }
+  },
+  {
+    "name": "inventory_reserve_stock",
+    "description": "inventory.v1.InventoryService.ReserveStock.",
+    "read_only": false,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "sku": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "holdMinutes": {
+          "type": "integer"
+        },
+        "untilShipped": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "required": [
+                "holdMinutes"
+              ]
+            },
+            {
+              "required": [
+                "untilShipped"
+              ]
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "holdMinutes"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "untilShipped"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "reservationId": {
+          "type": "string"
+        },
+        "sku": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "remaining": {
+          "type": [
+            "integer",
+            "string"
+          ],
+          "pattern": "^-?\\d+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "route": {
+      "kind": "grpc",
+      "service": "inventory.v1.InventoryService",
+      "method": "ReserveStock",
+      "server_streaming": false
+    }
+  },
+  {
+    "name": "inventory_watch_stock",
+    "description": "inventory.v1.InventoryService.WatchStock. Streams updates: each update is reported as progress; the last one is the result.",
+    "read_only": true,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "sku": {
+          "type": "string"
+        },
+        "updates": {
+          "type": "integer"
+        },
+        "intervalMs": {
+          "type": "integer"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "sku": {
+          "type": "string"
+        },
+        "available": {
+          "type": [
+            "integer",
+            "string"
+          ],
+          "pattern": "^-?\\d+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "STOCK_STATUS_UNSPECIFIED",
+            "IN_STOCK",
+            "LOW_STOCK",
+            "OUT_OF_STOCK"
+          ]
+        },
+        "warehouse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "route": {
+      "kind": "grpc",
+      "service": "inventory.v1.InventoryService",
+      "method": "WatchStock",
+      "server_streaming": true
+    }
+  }
+]

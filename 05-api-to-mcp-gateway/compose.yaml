@@ -1,0 +1,42 @@
+name: mcp-phase5
+
+services:
+  orders-rest:
+    build: ./backends/orders_rest
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  inventory-grpc:
+    build: ./backends/inventory_grpc
+    ports:
+      - "50051:50051"
+
+  gateway:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MCP_SERVICES_FILE: /app/config/services.yaml
+      MCP_OVERRIDES_FILE: /app/config/tool_overrides.yaml
+      MCP_REGISTRY_REFRESH_SECONDS: ${MCP_REGISTRY_REFRESH_SECONDS:-5}
+      MCP_IS_DISCOVERY_MODE: ${MCP_IS_DISCOVERY_MODE:-false}
+      MCP_FACADE_UPSTREAM_URL: http://localhost:8000/mcp
+      MCP_LOG_LEVEL: ${MCP_LOG_LEVEL:-INFO}
+    volumes:
+      # A directory mount, so edits to tool_overrides.yaml reach the container (reload test).
+      - ./config:/app/config:ro
+    depends_on:
+      orders-rest:
+        condition: service_healthy
+      inventory-grpc:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 3s
+      timeout: 3s
+      retries: 10

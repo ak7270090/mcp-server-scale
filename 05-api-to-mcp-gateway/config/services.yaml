@@ -1,0 +1,10 @@
+# Backends the gateway crawls. Tool names become <service name>_<operation in snake_case>.
+services:
+  - kind: rest
+    name: orders
+    base_url: http://orders-rest:8001
+    openapi_url: http://orders-rest:8001/openapi.json
+  - kind: grpc
+    name: inventory
+    target: inventory-grpc:50051
+    read_only_method_prefixes: [Get, List, Watch]

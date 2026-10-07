@@ -1,0 +1,513 @@
+[
+  {
+    "name": "orders_cancel_order",
+    "description": "Cancel an order that has not shipped.",
+    "read_only": false,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "integer",
+          "title": "Order Id"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "required": [
+        "order_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "title": "Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "shipped",
+            "cancelled"
+          ],
+          "title": "OrderStatus"
+        },
+        "customer_email": {
+          "type": "string",
+          "title": "Customer Email"
+        },
+        "customer_phone": {
+          "type": "string",
+          "title": "Customer Phone"
+        },
+        "items": {
+          "items": {
+            "properties": {
+              "sku": {
+                "type": "string",
+                "title": "Sku",
+                "description": "Stock-keeping unit, e.g. SKU-001"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1.0,
+                "title": "Quantity",
+                "description": "Number of units"
+              }
+            },
+            "type": "object",
+            "title": "OrderItem"
+          },
+          "type": "array",
+          "title": "Items"
+        },
+        "total_cents": {
+          "type": "integer",
+          "title": "Total Cents",
+          "description": "Order total in cents"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "title": "Order"
+    },
+    "route": {
+      "kind": "rest",
+      "method": "POST",
+      "path": "/orders/{order_id}/cancel",
+      "bindings": {
+        "order_id": [
+          "path",
+          "order_id"
+        ]
+      },
+      "result_wrapped": false
+    }
+  },
+  {
+    "name": "orders_create_order",
+    "description": "Create an order.",
+    "read_only": false,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "customer_email": {
+          "type": "string",
+          "title": "Customer Email"
+        },
+        "customer_phone": {
+          "type": "string",
+          "title": "Customer Phone"
+        },
+        "items": {
+          "items": {
+            "properties": {
+              "sku": {
+                "type": "string",
+                "title": "Sku",
+                "description": "Stock-keeping unit, e.g. SKU-001"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1.0,
+                "title": "Quantity",
+                "description": "Number of units"
+              }
+            },
+            "type": "object",
+            "required": [
+              "sku",
+              "quantity"
+            ],
+            "title": "OrderItem"
+          },
+          "type": "array",
+          "minItems": 1,
+          "title": "Items"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "required": [
+        "customer_email",
+        "customer_phone",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "title": "Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "shipped",
+            "cancelled"
+          ],
+          "title": "OrderStatus"
+        },
+        "customer_email": {
+          "type": "string",
+          "title": "Customer Email"
+        },
+        "customer_phone": {
+          "type": "string",
+          "title": "Customer Phone"
+        },
+        "items": {
+          "items": {
+            "properties": {
+              "sku": {
+                "type": "string",
+                "title": "Sku",
+                "description": "Stock-keeping unit, e.g. SKU-001"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1.0,
+                "title": "Quantity",
+                "description": "Number of units"
+              }
+            },
+            "type": "object",
+            "title": "OrderItem"
+          },
+          "type": "array",
+          "title": "Items"
+        },
+        "total_cents": {
+          "type": "integer",
+          "title": "Total Cents",
+          "description": "Order total in cents"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "title": "Order"
+    },
+    "route": {
+      "kind": "rest",
+      "method": "POST",
+      "path": "/orders",
+      "bindings": {
+        "customer_email": [
+          "body_field",
+          "customer_email"
+        ],
+        "customer_phone": [
+          "body_field",
+          "customer_phone"
+        ],
+        "items": [
+          "body_field",
+          "items"
+        ]
+      },
+      "result_wrapped": false
+    }
+  },
+  {
+    "name": "orders_get_caller",
+    "description": "Show the Authorization and traceparent headers this service received.",
+    "read_only": true,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "properties": {
+        "authorization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Authorization"
+        },
+        "traceparent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Traceparent"
+        }
+      },
+      "type": "object",
+      "title": "CallerInfo",
+      "description": "Headers the backend received, to check what the gateway passes through."
+    },
+    "route": {
+      "kind": "rest",
+      "method": "GET",
+      "path": "/caller",
+      "bindings": {},
+      "result_wrapped": false
+    }
+  },
+  {
+    "name": "orders_get_order",
+    "description": "Get one order by its ID.",
+    "read_only": true,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "integer",
+          "title": "Order Id"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "required": [
+        "order_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "title": "Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "shipped",
+            "cancelled"
+          ],
+          "title": "OrderStatus"
+        },
+        "customer_email": {
+          "type": "string",
+          "title": "Customer Email"
+        },
+        "customer_phone": {
+          "type": "string",
+          "title": "Customer Phone"
+        },
+        "items": {
+          "items": {
+            "properties": {
+              "sku": {
+                "type": "string",
+                "title": "Sku",
+                "description": "Stock-keeping unit, e.g. SKU-001"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1.0,
+                "title": "Quantity",
+                "description": "Number of units"
+              }
+            },
+            "type": "object",
+            "title": "OrderItem"
+          },
+          "type": "array",
+          "title": "Items"
+        },
+        "total_cents": {
+          "type": "integer",
+          "title": "Total Cents",
+          "description": "Order total in cents"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "title": "Order"
+    },
+    "route": {
+      "kind": "rest",
+      "method": "GET",
+      "path": "/orders/{order_id}",
+      "bindings": {
+        "order_id": [
+          "path",
+          "order_id"
+        ]
+      },
+      "result_wrapped": false
+    }
+  },
+  {
+    "name": "orders_list_orders",
+    "description": "List orders, newest last.",
+    "read_only": true,
+    "destructive": false,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "pending",
+                "shipped",
+                "cancelled"
+              ],
+              "title": "OrderStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status"
+        },
+        "limit": {
+          "type": "integer",
+          "maximum": 100,
+          "minimum": 1,
+          "default": 10,
+          "title": "Limit"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Return only these top-level fields of the result."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "integer",
+                "title": "Id"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "shipped",
+                  "cancelled"
+                ],
+                "title": "OrderStatus"
+              },
+              "customer_email": {
+                "type": "string",
+                "title": "Customer Email"
+              },
+              "customer_phone": {
+                "type": "string",
+                "title": "Customer Phone"
+              },
+              "items": {
+                "items": {
+                  "properties": {
+                    "sku": {
+                      "type": "string",
+                      "title": "Sku",
+                      "description": "Stock-keeping unit, e.g. SKU-001"
+                    },
+                    "quantity": {
+                      "type": "integer",
+                      "minimum": 1.0,
+                      "title": "Quantity",
+                      "description": "Number of units"
+                    }
+                  },
+                  "type": "object",
+                  "title": "OrderItem"
+                },
+                "type": "array",
+                "title": "Items"
+              },
+              "total_cents": {
+                "type": "integer",
+                "title": "Total Cents",
+                "description": "Order total in cents"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Created At"
+              }
+            },
+            "type": "object",
+            "title": "Order"
+          },
+          "title": "Response Listorders"
+        }
+      }
+    },
+    "route": {
+      "kind": "rest",
+      "method": "GET",
+      "path": "/orders",
+      "bindings": {
+        "status": [
+          "query",
+          "status"
+        ],
+        "limit": [
+          "query",
+          "limit"
+        ]
+      },
+      "result_wrapped": true
+    }
+  }
+]

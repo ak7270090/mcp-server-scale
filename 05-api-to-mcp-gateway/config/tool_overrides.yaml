@@ -1,0 +1,25 @@
+# Curation: every discovered tool is disabled until listed here with enabled: true.
+# See GET /registry for everything discovered. Changes apply on the next refresh.
+tools:
+  orders_get_order:
+    enabled: true
+    description: Look up one order by its numeric ID. Customer contact details are redacted.
+  orders_list_orders:
+    enabled: true
+    description: List orders, optionally filtered by status (pending, shipped, cancelled).
+  orders_create_order:
+    enabled: true
+    description: Create an order for a customer with one or more SKU and quantity items.
+  orders_get_caller:
+    enabled: true
+  # Left disabled on purpose: cancelling is destructive and needs review before agents get it.
+  orders_cancel_order:
+    enabled: false
+  inventory_get_stock:
+    enabled: true
+    description: Current stock for a SKU, with status and warehouse.
+  inventory_reserve_stock:
+    enabled: true
+    description: Reserve units of a SKU. Fails if not enough stock is available.
+  inventory_watch_stock:
+    enabled: true

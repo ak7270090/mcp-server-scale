@@ -1,0 +1,11 @@
+[project]
+name = "fastmcp-openapi-comparison"
+version = "0.1.0"
+description = "Phase 5 comparison: FastMCP.from_openapi on the orders OpenAPI document"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=4.0",
+]
+
+[tool.ruff]
+extend = "../../../ruff.toml"

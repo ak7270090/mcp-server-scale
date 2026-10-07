@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package inventory.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Stock levels per SKU. The gateway discovers this service through server reflection.
+service InventoryService {
+  rpc GetStock(GetStockRequest) returns (StockLevel);
+  rpc ReserveStock(ReserveStockRequest) returns (Reservation);
+  rpc WatchStock(WatchStockRequest) returns (stream StockLevel);
+}
+
+enum StockStatus {
+  STOCK_STATUS_UNSPECIFIED = 0;
+  IN_STOCK = 1;
+  LOW_STOCK = 2;
+  OUT_OF_STOCK = 3;
+}
+
+message Warehouse {
+  string code = 1;
+  string city = 2;
+}
+
+message GetStockRequest {
+  string sku = 1;
+}
+
+message StockLevel {
+  string sku = 1;
+  int64 available = 2;
+  StockStatus status = 3;
+  Warehouse warehouse = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message ReserveStockRequest {
+  string sku = 1;
+  int32 quantity = 2;
+  oneof hold {
+    int32 hold_minutes = 3;
+    bool until_shipped = 4;
+  }
+  repeated string notes = 5;
+  map<string, string> labels = 6;
+}
+
+message Reservation {
+  string reservation_id = 1;
+  string sku = 2;
+  int32 quantity = 3;
+  int64 remaining = 4;
+}
+
+message WatchStockRequest {
+  string sku = 1;
+  int32 updates = 2;
+  int32 interval_ms = 3;
+}

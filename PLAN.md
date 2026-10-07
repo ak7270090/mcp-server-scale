@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Phases 0–4 done; phase 5 planned |
+| **Status** | Phases 0–5 done |
 | **Last updated** | 2026-10-08 |
 | **Target spec / SDK** | MCP 2025-11-25, Python SDK `mcp` 1.30.0 (pinned per folder) |
 | **Runtime** | Docker Compose on Windows (Docker Desktop + WSL2), no Kubernetes |
@@ -417,43 +417,42 @@ sequenceDiagram
 ```
 05-api-to-mcp-gateway/
 ├── compose.yaml
-├── tool_overrides.yaml
+├── config/                   # services.yaml (what to crawl), tool_overrides.yaml (what to expose)
 ├── backends/
 │   ├── orders_rest/          # FastAPI app, own pyproject + Dockerfile
-│   └── inventory_grpc/       # grpcio server, inventory.proto, reflection on
+│   └── inventory_grpc/       # grpcio server, proto/inventory/v1/inventory.proto, reflection on
 ├── src/apigateway/
-│   ├── app.py, config.py, constants.py
-│   ├── openapi_tool_builder.py
-│   ├── grpc_tool_builder.py
-│   ├── tool_registry.py
-│   ├── rest_invoker.py
-│   ├── grpc_invoker.py
-│   ├── error_mapping.py
-│   ├── response_filters.py
-│   ├── discovery_tools.py
+│   ├── app.py, config.py, config_files.py, constants.py, tool_definitions.py
+│   ├── openapi_tool_builder.py, grpc_tool_builder.py, service_crawler.py
+│   ├── tool_registry.py, tool_router.py
+│   ├── rest_invoker.py, grpc_invoker.py, error_mapping.py, response_filters.py
+│   ├── discovery_tools.py, mcp_server.py
 │   └── rest_facade.py
-└── tests/
-    ├── fixtures/             # sample OpenAPI, .proto, expected tool JSON
-    └── test_*.py
+├── tests/                    # fixtures/ (OpenAPI, expected tool JSON), fake in-process gRPC server
+│   └── integration/          # Compose stack + Schemathesis
+├── load/locustfile.py
+└── comparisons/fastmcp_from_openapi/
 ```
 
 **Tasks**
-- [ ] Backends: `orders_rest` (`GET /orders/{id}`, `GET /orders?status=`, `POST /orders`); `inventory_grpc` (`GetStock`, `ReserveStock`, streaming `WatchStock`)
-- [ ] OpenAPI → tool: name from `operationId` with service prefix; input schema from path/query/body with `$ref` resolution; output schema from 2xx response; annotations from HTTP method
-- [ ] Proto → tool: JSON Schema via the proto3 JSON mapping (int64, enums, oneof, repeated, Timestamp, nested)
-- [ ] REST invoker (`httpx`, pooled, timeouts from config); gRPC invoker (`ParseDict` → dynamic `unary_unary` / `unary_stream` → `MessageToDict`)
-- [ ] Error mapping: business errors → `isError` result; protocol errors → JSON-RPC error; retries only for read-only tools
-- [ ] Pass through `Authorization` and `traceparent` (HTTP headers / gRPC metadata)
-- [ ] Registry: tools disabled by default, enabled via `tool_overrides.yaml`, periodic reload
-- [ ] Response filters: `fields` projection, configurable PII redaction patterns
-- [ ] Many-tools mode: `search_tools`, `get_tool_schema`, `invoke_tool`
-- [ ] Reverse facade: `GET /tools`, `POST /tools/{name}`, generated OpenAPI document
-- [ ] Optional: LLM-drafted tool descriptions through LangChain (model string in config), written to the overrides file for review
-- [ ] Comparison: rebuild the REST part with `FastMCP.from_openapi` (standalone `fastmcp`); document the differences
+- [x] Backends: `orders_rest` (get, list, create, cancel, `/caller`); `inventory_grpc` (`GetStock`, `ReserveStock`, streaming `WatchStock`)
+- [x] OpenAPI → tool: name from `operationId` with service prefix; input schema from path/query/header/body with `$ref` resolution; output schema from 2xx response; annotations from HTTP method
+- [x] Proto → tool: JSON Schema via the proto3 JSON mapping (int64, enums, oneof, repeated, map, Timestamp, nested)
+- [x] REST invoker (`httpx`, pooled, timeouts from config); gRPC invoker (`ParseDict` → dynamic `unary_unary` / `unary_stream` → `MessageToDict`)
+- [x] Error mapping: backend errors and invalid arguments → `isError` result (2025-11-25 spec); unknown tool → JSON-RPC `-32602`; retries only for read-only tools
+- [x] Pass through `Authorization` and `traceparent` (HTTP headers / gRPC metadata)
+- [x] Registry: tools disabled by default, enabled via `tool_overrides.yaml`, periodic reload, `/registry` listing
+- [x] Response filters: `fields` projection, configurable PII redaction patterns
+- [x] Many-tools mode: `search_tools`, `get_tool_schema`, `invoke_tool`
+- [x] Reverse facade: `GET /facade/tools`, `POST /facade/tools/{name}`, generated OpenAPI document
+- [ ] Optional: LLM-drafted tool descriptions through LangChain — not built
+- [x] Comparison: `FastMCP.from_openapi` (fastmcp 4.0.11 on mcp 2.3.0) on the same spec; differences in the README
 
 **Acceptance criteria:** every enabled REST and gRPC operation is callable as an MCP tool and through
 the facade; disabled tools never appear in `tools/list`; reload applies within one interval;
-gateway p95 overhead recorded.
+gateway p95 overhead recorded. **Met** — 8 integration tests incl. facade parity and Schemathesis
+(483 cases); `orders_cancel_order` hidden until enabled; reload 4.8 s with a 5 s interval;
+p95 75 ms through the gateway vs 12 ms direct.
 
 **Tests (phase-specific)**
 | Area | Method |
@@ -578,9 +577,11 @@ gantt
 
 ---
 
-## 10. Open items from phases 0–4
+## 10. Open items
 | Item | Status |
 |---|---|
+| Phase 5 gateway adds ~50 ms per call over direct REST (SSE response + session per call) | documented; next step: measure `json_response` mode |
+| Phase 5 LLM-drafted tool descriptions (optional task) | not built |
 | Phase 4 head-of-line blocking (p50 1.6 s at load vs 55 ms in phase 3) | documented; fix options: several jobs per worker, or a separate queue for slow tools |
 | Manual MCP Inspector check (phase 1) | not done |
 | Full 7-minute load profile, and 1/3/6 replica runs | only a short profile (~1 min) was run |

@@ -10,7 +10,7 @@ Plan: [PLAN.md](PLAN.md).
 | [02-streamable-http-single](02-streamable-http-single/) | Streamable HTTP, one replica (and the 4-worker failure) | done |
 | [03-sticky-session-lb](03-sticky-session-lb/) | 3 replicas behind HAProxy cookie / nginx prefix / Envoy envelope | done |
 | [04-gateway-queue-workers](04-gateway-queue-workers/) | gateway + NATS JetStream workers + autoscaler | done |
-| 05-api-to-mcp-gateway | REST/gRPC ↔ MCP translation (Part B) | planned |
+| [05-api-to-mcp-gateway](05-api-to-mcp-gateway/) | REST/gRPC ↔ MCP translation with curation, redaction, REST facade (Part B) | done |
 
 ## Comparison (short load profile, `get_replica_id`)
 | Setup | Affinity | Failover keeps state | Resumability | Elicitation | Load failures | p95 |
@@ -24,6 +24,9 @@ Plan: [PLAN.md](PLAN.md).
 
 Phase 4's latency is head-of-line blocking: one job per worker, so quick calls wait behind
 2-second slow jobs. See its README.
+
+Part B (phase 5) is not a scaling pattern: it measures translation overhead instead —
+`GET /orders/1` p95 12 ms directly vs 75 ms as an MCP tool through the gateway.
 
 ## Setup
 Windows, Python 3.11, one `venv` per folder (`python -m venv .venv` then
