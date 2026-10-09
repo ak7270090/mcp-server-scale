@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="cards.css"><title>Elicitation</title>
+<style>
+  .variants { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .variant { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .variant h2 { font-size: 17px; margin: 0 0 2px; }
+  .variant .kind { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+  .variant .tiles { grid-template-columns: 1fr 1fr; margin-bottom: 14px; }
+  .variant .tile { background: var(--surface-1); }
+  ol { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6; color: var(--text-primary); }
+  ol .lost { color: #a82727; font-weight: 600; }
+  ol .fine { color: var(--success-text); font-weight: 600; }
+</style></head>
+<body><div class="capture"><div class="card">
+  <h1>The worker dies while the user is still thinking</h1>
+  <p class="subtitle"><code>ask_confirmation</code> through the queue, 2 workers. The test kills the worker that asked, waits 1 s, then answers "yes".</p>
+  <div class="variants">
+    <div class="variant">
+      <h2>A · the worker waits for the answer</h2>
+      <div class="kind">MCP_ELICITATION_MODE=worker_waits</div>
+      <div class="tiles">
+        <div class="tile"><div class="value">2×</div><div class="label">user asked the question</div></div>
+        <div class="tile"><div class="value">5.6 s</div><div class="label">until the answer</div></div>
+      </div>
+      <ol>
+        <li>Worker 1 asks, then blocks waiting.</li>
+        <li class="lost">Worker 1 is killed; the answer has nobody to go to.</li>
+        <li>5 s without a heartbeat: JetStream redelivers the job.</li>
+        <li>Worker 2 asks the user <b>again</b>.</li>
+      </ol>
+    </div>
+    <div class="variant">
+      <h2>B · the worker saves state and finishes</h2>
+      <div class="kind">MCP_ELICITATION_MODE=continuation (default)</div>
+      <div class="tiles">
+        <div class="tile"><div class="value">1×</div><div class="label">user asked the question</div></div>
+        <div class="tile"><div class="value">1.7 s</div><div class="label">until the answer</div></div>
+      </div>
+      <ol>
+        <li>Worker 1 returns the question plus saved state, and is done.</li>
+        <li class="fine">Worker 1 is killed: nothing was waiting on it.</li>
+        <li>The gateway queues the answer as a new job.</li>
+        <li>Worker 2 finishes it.</li>
+      </ol>
+    </div>
+  </div>
+  <p class="source">Source: test_elicitation_under_failure.py (results/integration/elicitation-*.md). Variant B is the idea the 2026 MCP spec adopted as InputRequiredResult.</p>
+</div></div></body></html>

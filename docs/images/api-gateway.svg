@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" width="1200" height="440" role="img" aria-label="The control plane crawls the REST service's OpenAPI document and the gRPC service's reflection into a registry where every tool is disabled until a reviewed overrides file enables it; the data plane takes MCP calls and REST facade calls, validates them, and translates them into HTTP and gRPC calls with the caller's headers" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="440" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+
+  <text x="24" y="34" font-size="12" font-weight="700" fill="#64748b" letter-spacing="0.6">CONTROL PLANE · every 5 s</text>
+  <text x="24" y="196" font-size="12" font-weight="700" fill="#64748b" letter-spacing="0.6">DATA PLANE · every call</text>
+  <line x1="24" y1="170" x2="1176" y2="170" stroke="#e2e8f0"/>
+
+  <!-- Control plane -->
+  <rect x="40" y="56" width="220" height="64" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text x="150" y="83" text-anchor="middle" font-size="14" font-weight="600" fill="#78350f">tool_overrides.yaml</text>
+  <text x="150" y="103" text-anchor="middle" font-size="12" fill="#475569">reviewed: enable + describe</text>
+
+  <rect x="420" y="50" width="340" height="76" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="590" y="79" text-anchor="middle" font-size="15" font-weight="700" fill="#0c1e4a">Tool registry</text>
+  <text x="590" y="101" text-anchor="middle" font-size="12" fill="#475569">8 found · all disabled until enabled · 7 enabled</text>
+
+  <rect x="940" y="56" width="220" height="64" rx="12" fill="#f1f5f9" stroke="#64748b" stroke-width="1.3"/>
+  <text x="1050" y="83" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">Crawler</text>
+  <text x="1050" y="103" text-anchor="middle" font-size="12" fill="#475569">reads config/services.yaml</text>
+
+  <line x1="260" y1="88" x2="416" y2="88" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="338" y="78" text-anchor="middle" font-size="12" fill="#334155">which tools agents get</text>
+  <line x1="940" y1="88" x2="764" y2="88" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="852" y="78" text-anchor="middle" font-size="12" fill="#334155">tool definitions</text>
+
+  <!-- Data plane -->
+  <rect x="40" y="220" width="220" height="56" rx="12" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="150" y="244" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">MCP client</text>
+  <text x="150" y="263" text-anchor="middle" font-size="12" fill="#475569">an agent</text>
+
+  <rect x="40" y="330" width="220" height="56" rx="12" fill="#f5f3ff" stroke="#a78bfa" stroke-width="1.3"/>
+  <text x="150" y="354" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">REST client</text>
+  <text x="150" y="373" text-anchor="middle" font-size="12" fill="#475569">no MCP support</text>
+
+  <rect x="420" y="210" width="340" height="196" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="590" y="238" text-anchor="middle" font-size="15" font-weight="700" fill="#0c1e4a">Gateway</text>
+  <g font-size="12.5" fill="#0c1e4a">
+    <rect x="440" y="252" width="300" height="30" rx="8" fill="#ffffff" stroke="#93c5fd"/>
+    <text x="454" y="272">/mcp · validate arguments, retry reads</text>
+    <rect x="440" y="290" width="300" height="30" rx="8" fill="#ffffff" stroke="#93c5fd"/>
+    <text x="454" y="310">keep only the asked fields · redact PII</text>
+    <rect x="440" y="328" width="300" height="30" rx="8" fill="#ffffff" stroke="#93c5fd"/>
+    <text x="454" y="348">JSON ↔ HTTP · JSON ↔ protobuf</text>
+    <rect x="440" y="366" width="300" height="30" rx="8" fill="#ffffff" stroke="#c4b5fd"/>
+    <text x="454" y="386">/facade/tools/{name} · MCP tools as REST</text>
+  </g>
+
+  <line x1="590" y1="126" x2="590" y2="206" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-muted)"/>
+  <text x="598" y="160" font-size="12" fill="#64748b">enabled tools only</text>
+
+  <line x1="260" y1="248" x2="416" y2="266" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="338" y="246" text-anchor="middle" font-size="12" fill="#334155">tools/call</text>
+  <line x1="260" y1="358" x2="416" y2="380" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="338" y="356" text-anchor="middle" font-size="12" fill="#334155">POST JSON</text>
+
+  <rect x="940" y="220" width="220" height="64" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.3"/>
+  <text x="1050" y="247" text-anchor="middle" font-size="14" font-weight="600" fill="#064e3b">orders (REST)</text>
+  <text x="1050" y="267" text-anchor="middle" font-size="12" fill="#475569">FastAPI · OpenAPI document</text>
+
+  <rect x="940" y="330" width="220" height="64" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.3"/>
+  <text x="1050" y="357" text-anchor="middle" font-size="14" font-weight="600" fill="#064e3b">inventory (gRPC)</text>
+  <text x="1050" y="377" text-anchor="middle" font-size="12" fill="#475569">server reflection · streaming</text>
+
+  <line x1="760" y1="262" x2="936" y2="252" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="848" y="244" text-anchor="middle" font-size="12" fill="#334155">HTTP + caller's headers</text>
+  <line x1="760" y1="350" x2="936" y2="362" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="848" y="345" text-anchor="middle" font-size="12" fill="#334155">gRPC + headers as metadata</text>
+
+  <line x1="1050" y1="120" x2="1050" y2="216" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-muted)"/>
+  <text x="1042" y="160" text-anchor="end" font-size="12" fill="#64748b">OpenAPI doc</text>
+  <text x="1042" y="176" text-anchor="end" font-size="12" fill="#64748b">+ reflection</text>
+</svg>

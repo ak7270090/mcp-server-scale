@@ -99,16 +99,19 @@ Coverage omits the NATS/Docker adapters (`nats_client.py`, `job_bus.py`, `job_co
 | failover (kill the worker that served the session) | ✅ — counter continues |
 | pinning (one serving unit per session) | ❌ expected — calls go to any free worker |
 
-**Integration tests**
+**Integration tests** (final full run; the files in `results/integration/`)
 | Check | Result |
 |---|---|
-| Throughput, 10 × `run_slow_job(2)` | 1 worker 21.2 s · 5 workers 5.2 s · 10 workers 3.6 s |
+| Throughput, 10 × `run_slow_job(2)` | 1 worker 20.5 s · 5 workers 4.5 s · 10 workers 2.7 s |
 | Worker killed during `run_slow_job(6)` | redelivered to the other worker (attempts 1, 2); client progress 1…6 with no repeats; one result |
-| Cancel after first progress, 1 worker | next call answered in 0.08 s (the 30 s job stopped) |
+| Cancel after first progress, 1 worker | next call answered in 0.05 s (the 30 s job stopped) |
 | 10 calls, queue limit 3, 1 worker | 3 succeeded, 7 rejected with "queue is full" |
-| Elicitation, asking worker killed while user thinks — A `worker_waits` | user asked **twice** (redelivery re-asks), 5.4 s |
-| — B `continuation` | user asked **once**, 1.6 s |
-| Autoscaler, 30 × `run_slow_job(4)`, min 1 / max 10 | 1 → 10 workers in ~5 s, 30/30 succeeded, back to 1 after cooldown |
+| Elicitation, asking worker killed while user thinks — A `worker_waits` | user asked **twice** (redelivery re-asks), 5.6 s |
+| — B `continuation` | user asked **once**, 1.7 s |
+| Autoscaler, 30 × `run_slow_job(4)`, min 1 / max 10 | 1 → 10 workers in ~12 s, 30/30 succeeded, back to 1 after cooldown |
+
+An earlier run of the same tests measured 21.2 / 5.2 / 3.6 s, 0.08 s, 5.4 / 1.6 s and ~5 s; the
+autoscaler's ramp depends on how fast Docker starts the stopped containers.
 
 **Load (short profile, 3 workers):** 569 requests, 0 failures; `get_replica_id` p50 / p95
 1.6 s / 3.8 s (phase 3: 55 / 68 ms).

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="cards.css"><title>Schemathesis</title></head>
+<body><div class="capture"><div class="terminal">
+  <div class="titlebar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>&nbsp;&nbsp;Schemathesis fuzzing the REST facade's generated OpenAPI document</div>
+<pre><span class="t-prompt">$</span> schemathesis run http://localhost:8000/facade/openapi.json \
+    --checks not_a_server_error,response_schema_conformance,status_code_conformance
+<span class="t-dim">____________________ POST /facade/tools/orders_list_orders _____________________</span>
+<span class="t-fail">- Server error</span>
+<span class="t-fail">- Undocumented HTTP status code</span>
+    Received: 500
+    Documented: 200, 400, 404, 422, 502
+    curl -X POST -H 'Content-Type: application/json' -d '<span class="t-warn">�[</span>' http://localhost:8000/facade/tools/orders_list_orders
+<span class="t-dim">_____________________ POST /facade/tools/orders_get_caller _____________________</span>
+<span class="t-fail">- Response violates schema</span>
+    "{}" is not of type "object"
+    Value: {"result":<span class="t-warn">"{}"</span>}
+    curl -X POST -H 'Content-Type: application/json' -d '{"fields": [""]}' http://localhost:8000/facade/tools/orders_get_caller
+
+Failures:  <span class="t-fail">❌ Server error: 3   ❌ Response violates schema: 4   ❌ Undocumented HTTP status code: 3</span>
+Test cases: 396 generated, 7 found <span class="t-fail t-bold">10 unique failures</span>
+
+<span class="t-dim"># fix 1: a body that isn't valid UTF-8 raised UnicodeDecodeError, not JSONDecodeError → catch ValueError, answer 400</span>
+<span class="t-dim"># fix 2: "fields" matched nothing, so the result {} was falsy and sent back as the string "{}"</span>
+
+<span class="t-prompt">$</span> schemathesis run http://localhost:8000/facade/openapi.json ...
+Test Phases:  <span class="t-pass">✅ Coverage   ✅ Fuzzing</span>
+Test cases: <span class="t-pass t-bold">483 generated, 483 passed</span></pre>
+</div></div></body></html>

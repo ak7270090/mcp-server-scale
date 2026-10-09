@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="cards.css"><title>Failover</title></head>
+<body><div class="capture"><div class="card">
+  <h1>Kill the server that is holding the session</h1>
+  <p class="subtitle">The harness counts to 3 in one session, kills the server that answered (<code>docker kill</code>), then calls again.</p>
+  <table class="matrix">
+    <thead><tr><th style="width:26%">Setup</th><th style="width:20%">Next call</th><th>What the client sees</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="question">03 · HAProxy cookie<span class="hint">3 replicas, cookie names the replica</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>session lost</span></td>
+        <td><code>404</code> → <code>McpError: Session terminated</code><span class="note">Rerouted to a live replica that doesn't know the session. The client can start a new one.</span></td>
+      </tr>
+      <tr>
+        <td class="question">03 · nginx session-ID prefix<span class="hint">ID looks like mcp-replica-2.&lt;uuid&gt;</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>session lost</span></td>
+        <td><code>502 Bad Gateway</code><span class="note">The prefix pins the call to the dead replica, with no fallback. Looks like an outage, not a lost session.</span></td>
+      </tr>
+      <tr>
+        <td class="question">03 · Envoy envelope<span class="hint">replica address wrapped around the ID</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>session lost</span></td>
+        <td><code>404</code> → <code>McpError: Session terminated</code><span class="note">Same as HAProxy, with no change to the server code.</span></td>
+      </tr>
+      <tr>
+        <td class="question">04 · gateway + queue<span class="hint">3 workers, counter in NATS key-value</span></td>
+        <td><span class="status good"><span class="icon">✓</span>counter = 4</span></td>
+        <td>The next job goes to another worker<span class="note">The gateway still holds the session; the state was never in the worker that died.</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="source">Source: test_failover.py runs (pytest --runxfail for the reasons), phases 3 and 4.</p>
+</div></div></body></html>

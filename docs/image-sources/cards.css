@@ -1,0 +1,86 @@
+:root {
+  --surface-1: #fcfcfb;
+  --page: #ffffff;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+  --success-text: #006300;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 12px;
+  background: var(--page);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+}
+.capture { width: 1000px; }
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 30px 34px 26px;
+}
+h1 { font-size: 24px; margin: 0 0 6px; font-weight: 700; }
+.subtitle { color: var(--text-secondary); font-size: 15px; margin: 0 0 22px; }
+.source { color: var(--text-muted); font-size: 13px; margin: 20px 0 0; }
+.tiles { display: grid; gap: 12px; margin-bottom: 24px; }
+.tile {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.tile .value { font-size: 30px; font-weight: 700; line-height: 1.1; }
+.tile .label { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+/* horizontal bars */
+.bars { display: grid; grid-template-columns: 290px 1fr; row-gap: 14px; align-items: center; }
+.bar-label .name { font-size: 16px; }
+.bar-label .detail { font-size: 13px; color: var(--text-secondary); }
+.bar-track { border-left: 1px solid var(--baseline); padding-left: 0; display: grid; gap: 4px; }
+.bar-row { display: flex; align-items: center; gap: 8px; }
+.bar { height: 22px; border-radius: 0 4px 4px 0; }
+.bar-value { font-size: 14px; color: var(--text-primary); white-space: nowrap; }
+.legend { display: flex; gap: 18px; font-size: 13px; color: var(--text-secondary); margin: -8px 0 16px; }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* status table */
+table.matrix { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+table.matrix th { text-align: left; font-weight: 600; color: var(--text-secondary); padding: 8px 10px; border-bottom: 1px solid var(--baseline); font-size: 13.5px; }
+table.matrix td { padding: 10px 10px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
+table.matrix td.question { font-weight: 500; }
+table.matrix .hint { display: block; color: var(--text-muted); font-size: 12.5px; font-weight: 400; }
+.status { white-space: nowrap; font-weight: 600; }
+.status .icon { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: #fff; font-size: 11px; margin-right: 6px; vertical-align: -3px; }
+.status.good { color: var(--success-text); } .status.good .icon { background: var(--status-good); }
+.status.bad { color: #a82727; } .status.bad .icon { background: var(--status-critical); }
+.status.random { color: #8a5a00; } .status.random .icon { background: var(--status-warning); color: #3d2a00; }
+.status.none { color: var(--text-muted); font-weight: 400; } .status.none .icon { background: var(--baseline); }
+.note { display: block; font-weight: 400; color: var(--text-secondary); font-size: 12.5px; white-space: normal; }
+
+/* terminal */
+.terminal {
+  background: #0d1117;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  color: #e6edf3;
+  font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.terminal .titlebar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #21262d; font-family: "Segoe UI", system-ui, sans-serif; color: #9da7b3; font-size: 14px; }
+.terminal .dot { width: 12px; height: 12px; border-radius: 50%; }
+.terminal pre { margin: 0; padding: 16px 22px 20px; white-space: pre-wrap; font: inherit; }
+.t-prompt { color: #3fb950; } .t-dim { color: #8b949e; } .t-fail { color: #ff7b72; }
+.t-pass { color: #3fb950; } .t-warn { color: #e3b341; } .t-info { color: #79c0ff; } .t-bold { font-weight: 700; }

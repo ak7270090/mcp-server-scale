@@ -362,9 +362,9 @@ flowchart LR
 **Acceptance criteria:** throughput rises as workers scale 1→10; a killed worker's job is redelivered
 and completes once; cancel stops the worker; the autoscaler reacts within the configured window;
 backpressure returns a clean error; both elicitation variants pass, and variant B survives a worker
-kill while waiting for the user. **Met** — 21.2 s → 3.6 s for 10 jobs (1 → 10 workers);
-redelivery completes once with monotonic progress; cancel frees the worker in 0.08 s; 1 → 10
-workers in ~5 s; 7 of 10 calls rejected cleanly at queue limit 3; variant B asks once, variant A
+kill while waiting for the user. **Met** — 20.5 s → 2.7 s for 10 jobs (1 → 10 workers);
+redelivery completes once with monotonic progress; cancel frees the worker in 0.05 s; 1 → 10
+workers in ~12 s; 7 of 10 calls rejected cleanly at queue limit 3; variant B asks once, variant A
 twice.
 
 ---

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="cards.css"><title>Four workers</title></head>
+<body><div class="capture"><div class="terminal">
+  <div class="titlebar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>&nbsp;&nbsp;test-harness: the same server, started with 4 Uvicorn workers</div>
+<pre><span class="t-prompt">$</span> MCP_WORKER_COUNT=4 docker compose up -d
+<span class="t-prompt">$</span> pytest tests/suites
+<span class="t-dim">  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)</span>
+<span class="t-fail">  | mcp.shared.exceptions.McpError: Session terminated</span>
+<span class="t-warn">WARNING  mcp.client.streamable_http: Session termination failed: 404</span>
+<span class="t-pass">PASSED</span> tests/suites/test_conformance.py::test_rejects_request_without_session_id
+<span class="t-pass">PASSED</span> tests/suites/test_conformance.py::test_rejects_unknown_session_id
+<span class="t-pass">PASSED</span> tests/suites/test_resumability.py::test_resumed_stream_misses_no_progress
+<span class="t-fail">FAILED</span> tests/suites/test_conformance.py::test_lists_standard_tool_set <span class="t-dim">- McpError</span>
+<span class="t-fail">FAILED</span> tests/suites/test_conformance.py::test_reports_replica_identity <span class="t-dim">- McpError</span>
+<span class="t-fail">FAILED</span> tests/suites/test_conformance.py::test_slow_job_reports_progress_each_second
+<span class="t-fail">FAILED</span> tests/suites/test_distribution.py::test_new_sessions_spread_across_replicas
+<span class="t-fail">FAILED</span> tests/suites/test_session_affinity.py::test_counter_counts_up_without_resets
+<span class="t-fail">FAILED</span> tests/suites/test_session_affinity.py::test_session_stays_on_one_serving_unit
+<span class="t-bold"><span class="t-fail">6 failed</span>, <span class="t-pass">5 passed</span>, 1 skipped</span> <span class="t-dim">in 7.62s</span>
+
+<span class="t-dim"># Locust on the same 4 workers: 731 requests, 0 failed tool calls.</span>
+<span class="t-dim"># Each simulated user keeps one keep-alive connection, which stays on one worker.</span></pre>
+</div></div></body></html>

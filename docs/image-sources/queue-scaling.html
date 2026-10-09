@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="cards.css"><title>Queue scaling</title>
+<style>
+  .panels { display: grid; grid-template-columns: 1fr 1.35fr; gap: 28px; }
+  .panel h2 { font-size: 16px; margin: 0 0 4px; }
+  .panel p { font-size: 13px; color: var(--text-secondary); margin: 0 0 14px; }
+  .bars { grid-template-columns: 92px 1fr; }
+  svg text { font-family: "Segoe UI", system-ui, sans-serif; }
+</style></head>
+<body><div class="capture"><div class="card">
+  <h1>More workers, less waiting</h1>
+  <p class="subtitle">Phase 4: tool calls are jobs on a NATS JetStream queue, run by a pool of workers.</p>
+  <div class="tiles" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="tile"><div class="value">7.6×</div><div class="label">faster with 10 workers than 1</div></div>
+    <div class="tile"><div class="value">30 / 30</div><div class="label">jobs done during autoscaling</div></div>
+    <div class="tile"><div class="value">0.05 s</div><div class="label">worker free after a cancel</div></div>
+    <div class="tile"><div class="value">7 / 10</div><div class="label">calls rejected at limit 3</div></div>
+  </div>
+  <div class="panels">
+    <div class="panel">
+      <h2>10 jobs of 2 seconds each</h2>
+      <p>Wall time until all 10 finish.</p>
+      <div class="bars">
+        <div class="bar-label"><div class="name">1 worker</div></div>
+        <div class="bar-track"><div class="bar-row"><div class="bar" style="width:290px;background:var(--series-1)"></div><span class="bar-value">20.5 s</span></div></div>
+        <div class="bar-label"><div class="name">5 workers</div></div>
+        <div class="bar-track"><div class="bar-row"><div class="bar" style="width:64px;background:var(--series-1)"></div><span class="bar-value">4.5 s</span></div></div>
+        <div class="bar-label"><div class="name">10 workers</div></div>
+        <div class="bar-track"><div class="bar-row"><div class="bar" style="width:38px;background:var(--series-1)"></div><span class="bar-value">2.7 s</span></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Autoscaler: running workers over time</h2>
+      <p>Min 1, max 10, 2 queued jobs per worker, 10 s cool-down before scaling in.</p>
+      <svg viewBox="0 0 520 230" width="520" height="230" role="img" aria-label="Workers drop from 10 to 1 when idle, rise to 10 within 12 seconds when 30 jobs arrive at 33 seconds, and return to 1 after the jobs finish">
+        <g stroke="#e1e0d9" stroke-width="1">
+          <line x1="40" y1="20" x2="510" y2="20"/><line x1="40" y1="74" x2="510" y2="74"/>
+          <line x1="40" y1="128" x2="510" y2="128"/>
+        </g>
+        <line x1="40" y1="182" x2="510" y2="182" stroke="#c3c2b7"/>
+        <g font-size="11" fill="#898781" text-anchor="end">
+          <text x="34" y="24">10</text><text x="34" y="78">7</text><text x="34" y="132">4</text><text x="34" y="186">1</text>
+        </g>
+        <g font-size="11" fill="#898781" text-anchor="middle">
+          <text x="40" y="200">0 s</text><text x="176" y="200">20 s</text><text x="313" y="200">40 s</text><text x="449" y="200">60 s</text>
+        </g>
+        <rect x="268" y="16" width="117" height="166" fill="#2a78d6" opacity="0.07"/>
+        <text x="272" y="216" font-size="11.5" fill="#52514e">30 jobs queued at 33 s</text>
+        <polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="43.4,20 51.6,38 60.5,38 72.1,56 82.3,56 95.3,74 105.5,92 115.8,110 131.5,110 145.2,128 156.1,146 167.0,164 179.3,164 190.9,164 201.9,182 222.4,182 240.1,182 255.9,182 268.2,182 279.1,146 290.7,128 303.7,110 316.7,74 328.3,56 341.3,38 350.8,20 362.4,20 372.7,20 392.5,20 402.1,20 411.0,20 419.2,20 423.3,20 431.5,38 440.4,74 448.6,74 456.8,74 465.0,74 473.9,74 482.8,110 491.0,146 498.5,164 507.4,182"/>
+        <text x="352" y="14" font-size="11.5" fill="#0b0b0b">10 workers</text>
+        <text x="207" y="172" font-size="11.5" fill="#52514e">idle → 1</text>
+      </svg>
+    </div>
+  </div>
+  <p class="source">Source: tests/integration in 04-gateway-queue-workers (results/integration/throughput.md, autoscaling.md, cancellation.md, backpressure.md).</p>
+</div></div></body></html>

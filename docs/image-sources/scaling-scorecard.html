@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="cards.css"><title>Scorecard</title></head>
+<body><div class="capture"><div class="card">
+  <h1>The same six checks, four ways to run the server</h1>
+  <p class="subtitle">Results of the shared test harness against each setup. Same tools, same tests; only the scaling pattern changes.</p>
+  <table class="matrix">
+    <thead><tr>
+      <th style="width:30%">What the harness checks</th>
+      <th>02 · one worker</th>
+      <th>02 · four workers</th>
+      <th>03 · sticky load balancer</th>
+      <th>04 · gateway + queue</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td class="question">The session's counter keeps counting<span class="hint">1,000 calls in one session, no reset</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>fails</span><span class="note">"Session terminated"</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">all 3 balancers</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">counter in NATS KV</span></td>
+      </tr>
+      <tr>
+        <td class="question">Every call lands on the same server<span class="hint">one serving unit per session</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>fails</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>fails</span><span class="note">by design: any free worker</span></td>
+      </tr>
+      <tr>
+        <td class="question">The session survives its server dying<span class="hint">kill the server that served it</span></td>
+        <td><span class="status none"><span class="icon">–</span>n/a</span><span class="note">only one server</span></td>
+        <td><span class="status none"><span class="icon">–</span>n/a</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>fails</span><span class="note">session lost (404 / 502)</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">next call on another worker</span></td>
+      </tr>
+      <tr>
+        <td class="question">A dropped progress stream resumes<span class="hint">reconnect with Last-Event-ID</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+        <td><span class="status random"><span class="icon">~</span>random</span><span class="note">depends on the worker</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">HAProxy needs a 2nd try</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+      </tr>
+      <tr>
+        <td class="question">The user's answer reaches the waiting tool<span class="hint">elicitation round trip</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+        <td><span class="status random"><span class="icon">~</span>random</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">even if the worker dies</span></td>
+      </tr>
+      <tr>
+        <td class="question">New sessions spread across servers<span class="hint">30 sessions</span></td>
+        <td><span class="status none"><span class="icon">–</span>n/a</span></td>
+        <td><span class="status bad"><span class="icon">✕</span>fails</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">≈ 10 / 10 / 10</span></td>
+        <td><span class="status good"><span class="icon">✓</span>passes</span><span class="note">exactly 10 / 10 / 10</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="source">Source: test-harness runs saved in each phase's results/ folder (pytest, MCP Python SDK 1.30, Docker Compose).</p>
+</div></div></body></html>
