@@ -5,25 +5,9 @@ Gateway. A control plane discovers operations (OpenAPI for REST, server reflecti
 keeps every tool **disabled until a reviewed override enables it**. A data plane translates calls
 both ways, filters results, and also serves **MCP tools as REST** (the reverse direction).
 
-```mermaid
-flowchart LR
-    subgraph control["Control plane (every MCP_REGISTRY_REFRESH_SECONDS)"]
-        services["config/services.yaml"] --> crawler["service_crawler"]
-        crawler -->|"GET /openapi.json"| otb["openapi_tool_builder"]
-        crawler -->|"gRPC reflection"| gtb["grpc_tool_builder"]
-        otb & gtb --> registry[("tool_registry: all disabled")]
-        overrides["config/tool_overrides.yaml"] --> registry
-    end
-    subgraph data["Data plane"]
-        mcp["/mcp (low-level MCP server)"] --> router["tool_router: validate, retry, filter"]
-        router --> rest["rest_invoker (httpx)"]
-        router --> grpcinv["grpc_invoker (dynamic stubs)"]
-        facade["/facade/tools/{name} (REST)"] -->|"MCP client"| mcp
-    end
-    registry -.-> router
-    rest -->|"HTTP + Authorization, traceparent"| orders["orders_rest (FastAPI)"]
-    grpcinv -->|"gRPC + metadata"| inventory["inventory_grpc"]
-```
+![Phase 5: the control plane crawls services.yaml every 5 s into a tool registry where 8 operations start disabled and tool_overrides.yaml enables 7; the gateway validates, filters, masks PII and translates MCP and REST-facade calls into HTTP for orders_rest and gRPC for inventory_grpc](docs/architecture.png)
+
+Editable source: [docs/architecture.excalidraw](docs/architecture.excalidraw).
 
 ```mermaid
 sequenceDiagram
@@ -59,6 +43,7 @@ sequenceDiagram
 | `tests/integration/` | 8 tests against the Compose stack, incl. Schemathesis fuzzing of the facade |
 | `load/locustfile.py` | direct REST vs through the gateway |
 | `comparisons/fastmcp_from_openapi/` | same OpenAPI document through `FastMCP.from_openapi` |
+| `docs/` | architecture diagram: `architecture.png` and its editable `architecture.excalidraw` |
 
 ## Design choices
 - **Tool names** are `<service>_<operation in snake_case>` (`getOrder` → `orders_get_order`).
@@ -116,6 +101,10 @@ Enable a tool: set `enabled: true` in `config/tool_overrides.yaml`; it appears w
 | Direct REST | 7 ms | 12 ms | 14 ms | 91.7 | 0 |
 | Gateway, first version | 71 ms | 380 ms | 600 ms | 62.0 | 0 |
 | Gateway, compiled validators | 59 ms | 75 ms | 95 ms | 73.0 | 0 |
+
+![Latency of GET /orders/1: direct REST 7 / 12 ms p50 / p95; first gateway version 71 / 380 ms; compiled validators 59 / 75 ms](../docs/images/gateway-overhead.png)
+
+![Schemathesis: a 500 on a body that is not valid UTF-8 and an empty result sent as the string "{}"; after two fixes, 483 generated cases and 483 passed](../docs/images/schemathesis.png)
 
 **FastMCP.from_openapi** (fastmcp 4.0.11 on mcp 2.3.0, report in `results/comparison/`)
 | | FastMCP.from_openapi | This gateway |

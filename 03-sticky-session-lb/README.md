@@ -3,15 +3,9 @@
 Three stateful replicas behind three load balancers, each pinning a session to its replica in a
 different way. Every replica issues session IDs prefixed with its name (`mcp-replica-2.<uuid>`).
 
-```mermaid
-flowchart LR
-    client["harness"] --> ha["8081 HAProxy: cookie MCP_REPLICA"]
-    client --> ng["8082 nginx: map on session-ID prefix"]
-    client --> ev["8083 Envoy: envelope session state"]
-    ha & ng & ev --> r1["mcp-replica-1"]
-    ha & ng & ev --> r2["mcp-replica-2"]
-    ha & ng & ev --> r3["mcp-replica-3"]
-```
+![Phase 3: the harness reaches three replicas through HAProxy (cookie), nginx (session-ID prefix) or Envoy (envelope); each pins session S to mcp-replica-2, and when that replica dies the session is lost with a 404 or 502](docs/architecture.png)
+
+Editable source: [docs/architecture.excalidraw](docs/architecture.excalidraw).
 
 ```mermaid
 sequenceDiagram
@@ -36,6 +30,7 @@ sequenceDiagram
 | `infra/envoy.yaml` | variant C: `envelope` stateful session on `mcp-session-id`, health checks, outlier detection, retry only on connect failure, no route timeout |
 | `harness/*.env` | harness expectations per load balancer |
 | `results/` | JUnit reports, distribution and Locust reports, restart experiment |
+| `docs/` | architecture diagram: `architecture.png` and its editable `architecture.excalidraw` |
 
 The SDK (mcp 1.30) has no public hook for session ID generation, so the manager overrides the
 private `_admit_session` and is installed through FastMCP's `_session_manager`. The version is
@@ -71,6 +66,8 @@ The failover suite runs `docker kill <replica>` and then `docker start <replica>
 
 Load used the short profile (5 → 30 → 60 users, ~50 s). Full profile: unset the
 `HARNESS_LOAD_*` overrides.
+
+![Failover: HAProxy cookie and Envoy envelope lose the session with 404 Session terminated, nginx prefix with 502 Bad Gateway; the phase 4 gateway with a queue continues on another worker](../docs/images/failover.png)
 
 **Restart under load** (HAProxy, 30 users, `mcp-replica-1` restarted at 25 s)
 | Restart | Requests | Failures | Failure types |

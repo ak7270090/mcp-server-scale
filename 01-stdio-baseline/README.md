@@ -3,12 +3,9 @@
 Reference implementation of the standard tool set. One server process per client, started by the
 host over stdin/stdout.
 
-```mermaid
-flowchart LR
-    host["MCP host: Inspector / Claude"] -->|"stdin/stdout JSON-RPC"| server["python -m mcpserver"]
-    server --> tools["tools.py: ReplicaTools"]
-    tools --> store["SessionCounterStore (process memory)"]
-```
+![Phase 1: the MCP host starts python -m mcpserver and talks JSON-RPC over stdin/stdout; ReplicaTools keeps the session counter in process memory](docs/architecture.png)
+
+Editable source: [docs/architecture.excalidraw](docs/architecture.excalidraw).
 
 ## Layout
 | File | Contents |
@@ -19,6 +16,7 @@ flowchart LR
 | `src/mcpserver/config.py` | `ServerSettings` (`MCP_*` env vars) |
 | `tests/test_tools.py` | every tool through the SDK in-memory client |
 | `tests/test_stdio_entry_point.py` | starts `python -m mcpserver` as a subprocess and talks stdio |
+| `docs/` | architecture diagram: `architecture.png` and its editable `architecture.excalidraw` |
 
 ## Run
 ```powershell

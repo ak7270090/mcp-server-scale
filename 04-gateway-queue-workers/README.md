@@ -5,21 +5,21 @@ JetStream work queue; a pool of workers runs the tool code. Per-session state li
 key-value bucket, so any worker can serve any call. An optional autoscaler starts and stops
 worker containers based on queue depth.
 
-```mermaid
-flowchart LR
-    client["MCP client / harness"] --> gw["gateway :8000 — sessions, SSE, event store"]
-    gw -->|"JobRequest on jobs.submit"| js[("JetStream JOBS (work queue, max_msgs)")]
-    js --> w1["worker 1"]
-    js --> w2["worker 2"]
-    js --> wn["worker N"]
-    w1 & w2 & wn -->|"started / progress / input_required / result / failed"| rs(("jobs.results.{job}"))
-    rs --> gw
-    gw -.->|"answers / cancel"| w1
-    w1 & w2 & wn <--> kv[("KV session_counters")]
-    js -.->|"queue depth"| as["autoscaler (profile autoscale)"]
-    as -.->|"docker start / stop"| wn
-    w1 -.->|"too many deliveries"| dlq[("DEAD_JOBS")]
-```
+![Phase 4 architecture: client, gateway, JetStream queue, workers, KV, dead letters, autoscaler](docs/architecture.png)
+
+Editable source: [docs/architecture.excalidraw](docs/architecture.excalidraw).
+
+The gateway and workers never connect to each other; both talk only to NATS. Jobs are stored in
+JetStream until a worker acks them; everything else is a live core NATS message that only current
+subscribers receive.
+
+| Subject | Kind | Direction | Carries |
+|---|---|---|---|
+| `jobs.submit` | JetStream (JOBS) | gateway → workers | `JobRequest`, `Nats-Msg-Id` = job ID |
+| `jobs.results.<job>` | core NATS | worker → gateway | `JobStarted`, `JobProgress`, `JobInputRequired`, `JobResult`, `JobFailed` |
+| `jobs.answers.<job>` | core NATS | gateway → worker | elicitation answer (`worker_waits` mode only) |
+| `jobs.cancel.<job>` | core NATS | gateway → worker | cancel signal |
+| `jobs.dead` | JetStream (DEAD_JOBS) | worker → stream | jobs past `max_deliver` |
 
 ```mermaid
 sequenceDiagram
@@ -50,6 +50,7 @@ sequenceDiagram
 | `tests/unit/` | gateway, worker, autoscaler, messages, event store — with fakes, no Docker |
 | `tests/integration/` | throughput, redelivery, cancel, backpressure, elicitation under failure, autoscaling — drives the Compose stack |
 | `harness/gateway.env` | harness expectations |
+| `docs/` | architecture diagram: `architecture.png` and its editable `architecture.excalidraw` |
 
 ## Design choices
 - **One job at a time per worker**, with a heartbeat (`in_progress`) every second, so JetStream
@@ -109,6 +110,10 @@ Coverage omits the NATS/Docker adapters (`nats_client.py`, `job_bus.py`, `job_co
 | Elicitation, asking worker killed while user thinks — A `worker_waits` | user asked **twice** (redelivery re-asks), 5.6 s |
 | — B `continuation` | user asked **once**, 1.7 s |
 | Autoscaler, 30 × `run_slow_job(4)`, min 1 / max 10 | 1 → 10 workers in ~12 s, 30/30 succeeded, back to 1 after cooldown |
+
+![Throughput 20.5, 4.5 and 2.7 s for 1, 5 and 10 workers; autoscaler grows from 1 to 10 workers within about 12 s of 30 jobs arriving; cancel frees a worker in 0.05 s; 7 of 10 calls rejected at queue limit 3](../docs/images/queue-scaling.png)
+
+![Elicitation with the asking worker killed: variant A (worker waits) asks the user twice, 5.6 s; variant B (continuation) asks once, 1.7 s](../docs/images/elicitation-under-failure.png)
 
 An earlier run of the same tests measured 21.2 / 5.2 / 3.6 s, 0.08 s, 5.4 / 1.6 s and ~5 s; the
 autoscaler's ramp depends on how fast Docker starts the stopped containers.

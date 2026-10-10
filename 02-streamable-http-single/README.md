@@ -3,14 +3,9 @@
 The standard tool set over Streamable HTTP. Run A is one Uvicorn worker (the baseline). Run B is
 four workers in one container, which breaks sessions because each worker keeps its own in memory.
 
-```mermaid
-flowchart LR
-    client["harness"] -->|"POST/GET/DELETE /mcp"| uv["Uvicorn"]
-    uv --> w1["worker 1: sessions + event store"]
-    uv -.->|"run B only"| w2["worker 2"]
-    uv -.->|"run B only"| w3["worker 3"]
-    uv -.->|"run B only"| w4["worker 4"]
-```
+![Phase 2: the harness calls port 8000 in one container; run A has one Uvicorn worker holding session S, run B adds three workers with their own memory, so a later call can reach a worker without S and get 404](docs/architecture.png)
+
+Editable source: [docs/architecture.excalidraw](docs/architecture.excalidraw).
 
 ## Layout
 | File | Contents |
@@ -21,6 +16,7 @@ flowchart LR
 | `src/mcpserver/__main__.py` | Uvicorn with `MCP_WORKER_COUNT` workers |
 | `harness/single-worker.env` / `four-workers.env` | harness expectations for run A / B |
 | `results/` | distribution and Locust reports |
+| `docs/` | architecture diagram: `architecture.png` and its editable `architecture.excalidraw` |
 
 ## Run
 ```powershell
@@ -53,6 +49,8 @@ Tracing: start `../compose.observability.yaml` and set
 
 Run B's settings mark affinity and distribution as expected failures and skip the random suites,
 so the run is repeatable (`3 xfailed, 9 skipped`).
+
+![Terminal: with four Uvicorn workers the harness reports McpError Session terminated, 6 failed and 5 passed; Locust on the same setup saw 731 requests and 0 failed tool calls](../docs/images/four-workers-failure.png)
 
 **Load (short profile: 5 → 20 → 40 users, ~1 min)**
 | Run | Requests | Failures | `get_replica_id` p50 / p95 | Spread |
