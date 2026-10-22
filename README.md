@@ -1,9 +1,5 @@
 # MCP Scaling Lab
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)
-![MCP SDK 1.30](https://img.shields.io/badge/MCP%20SDK-1.30-blueviolet.svg)
-
 AI agents call tools through MCP servers, and in production those servers
 get scaled like any web service: more workers, a load balancer, an autoscaler. That breaks them,
 because an MCP session lives in one process's memory. I built the same MCP server five ways and

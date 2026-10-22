@@ -15,7 +15,7 @@ sequenceDiagram
     C->>LB: POST initialize (no session id)
     LB->>R2: round robin
     R2-->>LB: mcp-session-id: mcp-replica-2.7f3a…
-    LB-->>C: A: + Set-Cookie MCP_REPLICA=r2 / B: unchanged / C: base64(host);UV:base64(id)
+    LB-->>C: A: + Set-Cookie MCP_REPLICA=r2 / B: unchanged / C: base64(host)#59;UV:base64(id)
     C->>LB: POST tools/call (cookie or session id)
     LB->>R2: A: cookie / B: prefix map / C: decoded host
     R2-->>C: result
